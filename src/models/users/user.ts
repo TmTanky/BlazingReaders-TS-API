@@ -16,6 +16,6 @@ const userSchema = new Schema({
         ref: 'Blog'
     }],
     role: String
-})
+}, { timestamps: true })
 
 export const User = model<Iuser>('User', userSchema)

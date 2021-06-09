@@ -8,8 +8,9 @@ import createError from 'http-errors'
 const PORT = process.env.PORT || 8000
 const app = express()
 
-import registerRoute from './routes/register/register'
-import loginRoute from './routes/login/login'
+import registerRoute from './routes/users/register'
+import loginRoute from './routes/users/login'
+import blogRoute from './routes/posts/post'
 
 app.use(cors())
 app.use(helmet())
@@ -20,6 +21,7 @@ connect(`${process.env.MONGO}`, {useCreateIndex: true, useFindAndModify: false, 
 
 app.use(registerRoute)
 app.use(loginRoute)
+app.use(blogRoute)
 
 app.use((req, res, next) => {
     next(createError(400, 'Route not found.'))
@@ -34,5 +36,5 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Serve is running on port ${PORT}`)
+    console.log(`Server is running on port ${PORT}`)
 })

@@ -9,6 +9,7 @@ const blogSchema = new Schema({
         ref: 'User'
     },
     title: String,
+    content: String,
     likes: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
@@ -17,6 +18,6 @@ const blogSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     }]
-})
+}, { timestamps: true })
 
 export const Blog = model<Iblog>('Blog', blogSchema)
