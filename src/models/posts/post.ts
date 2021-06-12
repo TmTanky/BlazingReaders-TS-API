@@ -17,7 +17,8 @@ const blogSchema = new Schema({
     comments: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+    img: String
 }, { timestamps: true })
 
 export const Blog = model<Iblog>('Blog', blogSchema)

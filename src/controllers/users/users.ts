@@ -8,6 +8,7 @@ import {Roles} from '../../interfaces/roles'
 
 // Models
 import {User} from '../../models/users/user'
+import { Blog } from '../../models/posts/post'
 
 export const registerUser: RequestHandler = async (req, res, next) => {
 
@@ -90,6 +91,67 @@ export const loginUser: RequestHandler = async (req, res, next) => {
         } else {
             return next(createError(400, 'Invalid Email/Password'))
         }
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const getAllUsers: RequestHandler = async (req, res, next) => {
+
+    try {
+
+        const allUsers = await User.find()
+
+        return res.status(200).json({
+            status: res.status,
+            data: allUsers
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again'))
+    }
+
+}
+
+export const editUserRole: RequestHandler = async (req, res, next) => {
+
+    const userID = req.params.userID
+    const {newRole} = req.body as {newRole: string}
+
+    try {
+
+        console.log(userID)
+        console.log(newRole)
+
+        const updatedUser = await User.findOneAndUpdate({_id: userID}, {
+            role: newRole
+        }, { new: true })
+
+        return res.status(200).json({
+            status: res.status,
+            data: updatedUser
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const getAllInfo: RequestHandler = async (req, res, next) => {
+
+    try {
+
+        const allUsers = await User.find()
+
+        return res.status(200).json({
+            status: res.status,
+            data: {
+                totalUsers: allUsers.length
+            }
+        })
         
     } catch (err) {
         next(createError(400, 'Please try again.'))

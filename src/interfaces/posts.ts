@@ -9,4 +9,5 @@ export interface Iblog extends Document {
     content: string
     likes: Iuser[]
     comments: Iuser[]
+    img: string
 }

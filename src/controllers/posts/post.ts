@@ -23,12 +23,17 @@ export const createBlog: RequestHandler = async (req, res ,next) => {
             return next(createError(400, 'Inputs cannot be empty.'))
         }
 
+        if (!req.file) {
+            return next(createError(400, 'Photo must be provided.'))
+        }
+
         if (user?.role === Roles.ADMIN) {
 
             const newBlog = new Blog({
                 createdBy: userID,
                 title,
-                content
+                content,
+                img: `${req.file.path}`
             })
 
             await newBlog.save()
@@ -180,6 +185,42 @@ export const commentOnBlog: RequestHandler = async (req, res, next) => {
             status: res.status,
             data: newComment,
             msg: 'You commented on the post.'
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const getAllBlogs: RequestHandler = async (req, res, next) => {
+
+    try {
+
+        const allBlogs = await Blog.find()
+
+        return res.status(200).json({
+            status: res.status,
+            data: allBlogs
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const getOneBlog: RequestHandler = async (req, res, next) => {
+
+    const blogID = req.params.blogID
+
+    try {
+
+        const blog = await Blog.findById(blogID)
+
+        res.status(200).json({
+            status: res.status,
+            data: blog
         })
         
     } catch (err) {
