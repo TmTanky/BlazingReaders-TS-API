@@ -7,5 +7,7 @@ export interface Iuser extends Document {
     email: string
     password: string
     myBlogs: Iblog[]
-    role: string
+    role: string,
+    followers: Iuser[]
+    following: Iuser[]
 }

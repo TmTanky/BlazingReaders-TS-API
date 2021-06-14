@@ -140,7 +140,7 @@ export const editUserRole: RequestHandler = async (req, res, next) => {
 
 }
 
-export const getAllInfo: RequestHandler = async (req, res, next) => {
+export const dashboardInfo: RequestHandler = async (req, res, next) => {
 
     try {
 
@@ -151,6 +151,25 @@ export const getAllInfo: RequestHandler = async (req, res, next) => {
             data: {
                 totalUsers: allUsers.length
             }
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const getUserInfo: RequestHandler = async (req, res, next) => {
+
+    const userID = req.params.userID
+
+    try {
+
+        const user = await User.findById(userID).populate('myBlogs')
+
+        return res.status(200).json({
+            status: res.status,
+            data: user
         })
         
     } catch (err) {

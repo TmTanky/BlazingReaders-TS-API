@@ -38,6 +38,12 @@ export const createBlog: RequestHandler = async (req, res ,next) => {
 
             await newBlog.save()
 
+            await User.findOneAndUpdate({_id: userID}, {
+                $addToSet: {
+                    myBlogs: newBlog._id
+                }
+            })
+
             res.status(201).json({
                 status: res.status,
                 data: newBlog,
@@ -195,13 +201,28 @@ export const commentOnBlog: RequestHandler = async (req, res, next) => {
 
 export const getAllBlogs: RequestHandler = async (req, res, next) => {
 
+    const limitCount = req.query.limit as string
+
     try {
 
+        if (limitCount) {
+
+            const allBlogs = await Blog.find().limit(parseInt(limitCount))
+
+            return res.status(200).json({
+                status: res.status,
+                blogs: allBlogs
+            })
+
+        }
+        
+        const allUsers = await User.find().where('role').equals('admin')
         const allBlogs = await Blog.find()
 
         return res.status(200).json({
             status: res.status,
-            data: allBlogs
+            blogs: allBlogs,
+            randomUsers: allUsers
         })
         
     } catch (err) {
@@ -216,7 +237,7 @@ export const getOneBlog: RequestHandler = async (req, res, next) => {
 
     try {
 
-        const blog = await Blog.findById(blogID)
+        const blog = await Blog.findById(blogID).populate('createdBy')
 
         res.status(200).json({
             status: res.status,
