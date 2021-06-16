@@ -15,6 +15,10 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Blog'
     }],
+    myTweets: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Tweet'
+    }],
     role: String,
     following: [{
         type: Schema.Types.ObjectId,

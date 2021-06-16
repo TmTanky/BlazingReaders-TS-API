@@ -1,5 +1,6 @@
 import { Document } from 'mongoose'
 import { Iblog } from './posts';
+import { Itweet } from './tweets';
 
 export interface Iuser extends Document {
     firstName: string
@@ -10,4 +11,5 @@ export interface Iuser extends Document {
     role: string,
     followers: Iuser[]
     following: Iuser[]
+    myTweets: Itweet[]
 }

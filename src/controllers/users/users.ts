@@ -8,7 +8,9 @@ import {Roles} from '../../interfaces/roles'
 
 // Models
 import {User} from '../../models/users/user'
-import { Blog } from '../../models/posts/post'
+// import {Blog} from '../../models/posts/post'
+import {Tweet} from '../../models/tweets/tweet'
+import { Iuser } from '../../interfaces/users'
 
 export const registerUser: RequestHandler = async (req, res, next) => {
 
@@ -165,11 +167,66 @@ export const getUserInfo: RequestHandler = async (req, res, next) => {
 
     try {
 
-        const user = await User.findById(userID).populate('myBlogs')
+        const user = await User.findById(userID).populate('myBlogs').populate('myTweets').populate('followers')
+        const usersTweets = await Tweet.find().populate('tweetBy').where('tweetBy', {_id: userID}).sort({createdAt: -1})
 
         return res.status(200).json({
             status: res.status,
+            myTweets: usersTweets,
             data: user
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const followAndUnfollow: RequestHandler =  async (req, res, next) => {
+
+    const userID = req.params.userID
+    const otherID = req.params.otherID
+
+    try {
+
+        const toFollow = await User.findOne({_id: otherID}).populate('followers')
+
+        const result = toFollow?.followers.find((item) => item._id == userID)
+
+        if (result) {
+
+            await User.findOneAndUpdate({_id: userID}, {
+                $pull: {
+                    following: otherID
+                }
+            })
+    
+            await User.findOneAndUpdate({_id: otherID}, {
+                $pull: {
+                    followers: userID
+                }
+            })
+
+            return res.status(200).json({
+                msg: 'Unfollowed'
+            })
+
+        }
+
+        await User.findOneAndUpdate({_id: userID}, {
+            $addToSet: {
+                following: otherID
+            }
+        })
+
+        await User.findOneAndUpdate({_id: otherID}, {
+            $addToSet: {
+                followers: userID
+            }
+        })
+
+        return res.status(200).json({
+            msg: 'followed'
         })
         
     } catch (err) {

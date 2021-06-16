@@ -216,8 +216,9 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
 
         }
         
+        const totalBlogs = await Blog.find()
         const allUsers = await User.find().where('role').equals('admin')
-        const allBlogs = await Blog.find()
+        const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
 
         return res.status(200).json({
             status: res.status,
