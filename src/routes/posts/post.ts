@@ -7,7 +7,7 @@ import {upload} from '../../routes/imgs/img'
 // Auth
 import {authJWT} from '../../auth/auth'
 
-router.get('/allblogs', getAllBlogs)
+router.get('/allblogs/:userID', getAllBlogs)
 router.get('/getoneblog/:blogID', getOneBlog)
 router.post('/createblog/:userID', authJWT, upload, createBlog)
 router.patch('/editblog/:blogID', authJWT, editBlog)

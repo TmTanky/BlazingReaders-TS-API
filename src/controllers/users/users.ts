@@ -167,7 +167,7 @@ export const getUserInfo: RequestHandler = async (req, res, next) => {
 
     try {
 
-        const user = await User.findById(userID).populate('myBlogs').populate('myTweets').populate('followers')
+        const user = await User.findById(userID).populate('myBlogs').populate('myTweets').populate('followers').populate('following')
         const usersTweets = await Tweet.find().populate('tweetBy').where('tweetBy', {_id: userID}).sort({createdAt: -1})
 
         return res.status(200).json({
@@ -228,6 +228,95 @@ export const followAndUnfollow: RequestHandler =  async (req, res, next) => {
         return res.status(200).json({
             msg: 'followed'
         })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const editName: RequestHandler = async (req, res, next) => {
+
+    const userID = req.params.userID
+    const {firstName, lastName} = req.body as {firstName: string, lastName: string}
+
+    try {
+
+        await User.findOneAndUpdate({_id: userID}, {
+            firstName,
+            lastName
+        })
+
+        return res.status(200).json({
+            status: 'ok',
+            msg: 'Change Name Success'
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try agai.'))
+    }
+
+}
+
+export const editEmail: RequestHandler = async (req, res, next) => {
+
+    const userID = req.params.userID
+    const {email, password} = req.body as {email: string, password: string}
+
+    try {
+
+        const foundUser = await User.findOne({_id: userID})
+        const result = await compare(password, foundUser!.password)
+
+        if (result) {
+            await User.findOneAndUpdate({_id: userID}, {
+                email
+            })
+    
+            return res.status(200).json({
+                status: 'ok',
+                msg: 'Email Changed Successfully'
+            })
+        } else {
+            next(createError(400, 'Invalid Password, try again.'))
+        }
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const editPassword: RequestHandler = async (req, res, next) => {
+
+    const userID = req.params.userID
+    const {currentPass, newPass} = req.body as {currentPass: string, newPass: string}
+
+    try {
+
+        const currentUser = await User.findOne({_id: userID})
+        const result = await compare(currentPass, currentUser!.password)
+
+        if (result) {
+
+            const hashedPassword = await hash(newPass, 10)
+
+            if (newPass.length < 8) {
+                return next(createError(400, 'Password must be 8 characters long.'))
+            }
+
+            await User.findOneAndUpdate({_id: userID}, {
+                password: hashedPassword
+            })
+
+            return res.status(200).json({
+                status: 'ok',
+                msg: 'Password Succesfully Changed.'
+            })
+
+        } else {
+            return next(createError(400, 'Invalid Password.'))
+        }
         
     } catch (err) {
         next(createError(400, 'Please try again.'))

@@ -9,7 +9,6 @@ import {Comment} from '../../models/comments/comment'
 // TS 
 import {Roles} from '../../interfaces/roles'
 
-
 export const createBlog: RequestHandler = async (req, res ,next) => {
 
     const userID = req.params.userID
@@ -201,29 +200,56 @@ export const commentOnBlog: RequestHandler = async (req, res, next) => {
 
 export const getAllBlogs: RequestHandler = async (req, res, next) => {
 
+    const userID = req.params.userID
     const limitCount = req.query.limit as string
 
     try {
 
         if (limitCount) {
 
+            const blogsLength = (await Blog.find()).length
             const allBlogs = await Blog.find().limit(parseInt(limitCount))
+            const isMaxed = blogsLength === parseInt(limitCount)
 
             return res.status(200).json({
                 status: res.status,
-                blogs: allBlogs
+                blogs: allBlogs,
+                max: isMaxed
+            })
+
+        }
+
+        const theUser = await User.findById(userID)
+        
+        if (theUser?.role === Roles.ADMIN) {
+
+            const totalBlogs = await Blog.find()
+            const allUsers = await User.find().where('role').equals('admin')
+            const filteredPublishers = allUsers.filter(item => item._id.toString() !== theUser._id.toString())
+            const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
+
+            return res.status(200).json({
+                status: res.status,
+                blogs: allBlogs,
+                randomUsers: filteredPublishers
             })
 
         }
         
         const totalBlogs = await Blog.find()
-        const allUsers = await User.find().where('role').equals('admin')
+        const allUsers = await User.find().where('role').equals('admin').populate('followers')
+
+        // Almost working
+        const filteredPublishers = allUsers.filter(item => {
+            const user = !item.followers.find(() => theUser?._id.toString())
+            return user
+        })
         const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
 
         return res.status(200).json({
             status: res.status,
             blogs: allBlogs,
-            randomUsers: allUsers
+            randomUsers: filteredPublishers
         })
         
     } catch (err) {
