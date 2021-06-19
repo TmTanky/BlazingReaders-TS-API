@@ -16,7 +16,7 @@ const blogSchema = new Schema({
     }],
     comments: [{
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'Comment'
     }],
     img: String
 }, { timestamps: true })

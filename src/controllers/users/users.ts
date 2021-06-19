@@ -124,9 +124,6 @@ export const editUserRole: RequestHandler = async (req, res, next) => {
 
     try {
 
-        console.log(userID)
-        console.log(newRole)
-
         const updatedUser = await User.findOneAndUpdate({_id: userID}, {
             role: newRole
         }, { new: true })

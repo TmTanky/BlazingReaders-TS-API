@@ -180,7 +180,7 @@ export const commentOnBlog: RequestHandler = async (req, res, next) => {
 
         await Blog.findOneAndUpdate({_id: blogID}, {
             $addToSet: {
-                comments: userID
+                comments: newComment._id
             }
         })
 
@@ -204,6 +204,20 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
     const limitCount = req.query.limit as string
 
     try {
+
+        if (userID === 'notauth') {
+
+            const totalBlogs = await Blog.find()
+            const allUsers = await User.find().where('role').equals('admin')
+            const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
+
+            return res.status(200).json({
+                status: res.status,
+                blogs: allBlogs,
+                randomUsers: allUsers
+            })
+
+        }
 
         if (limitCount) {
 
@@ -264,7 +278,14 @@ export const getOneBlog: RequestHandler = async (req, res, next) => {
 
     try {
 
-        const blog = await Blog.findById(blogID).populate('createdBy')
+        const blog = await Blog.findById(blogID).
+            populate('createdBy').
+            populate('likes').
+            populate('comments').
+            populate({
+                path: 'comments',
+                populate: 'commentBy'
+            })
 
         res.status(200).json({
             status: res.status,
