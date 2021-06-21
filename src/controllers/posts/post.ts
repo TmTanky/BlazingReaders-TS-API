@@ -65,7 +65,7 @@ export const editBlog: RequestHandler = async (req, res, next) => {
     const {title, content} = req.body as {title: string, content: string}
 
     try {
-
+        
         const found = await Blog.findById(blogID)
 
         if (!found) {
@@ -95,6 +95,7 @@ export const editBlog: RequestHandler = async (req, res, next) => {
 
 export const deleteBlog: RequestHandler = async (req, res, next) => {
 
+    const userID = req.params.userID
     const blogID = req.params.blogID
 
     try {
@@ -105,7 +106,12 @@ export const deleteBlog: RequestHandler = async (req, res, next) => {
             return next(createError(400, 'Blog not found.'))
         }
 
-        await Blog.findByIdAndRemove(blogID) 
+        await Blog.findByIdAndRemove(blogID)
+        await User.findOneAndUpdate({_id: userID}, {
+            $pull: {
+                myBlogs: blogID
+            }
+        })
 
         res.status(200).json({
             status: res.status,

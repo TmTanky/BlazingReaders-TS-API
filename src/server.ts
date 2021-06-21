@@ -14,6 +14,7 @@ import loginRoute from './routes/users/login'
 import blogRoute from './routes/posts/post'
 import practiceUpload from './routes/imgs/tryimgupload'
 import tweetRoute from './routes/tweets/tweet'
+import dashboardRoute from './routes/dashboard/dashboard'
 
 app.use(cors())
 app.use(helmet())
@@ -29,6 +30,7 @@ app.use(blogRoute)
 app.use(practiceUpload)
 app.use(userRoute)
 app.use(tweetRoute)
+app.use(dashboardRoute)
 
 app.use((req, res, next) => {
     next(createError(400, 'Route not found.'))
