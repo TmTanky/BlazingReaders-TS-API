@@ -11,6 +11,10 @@ const userSchema = new Schema({
         unique: true
     },
     password: String,
+    avatar: {
+        type: String,
+        default: ""
+    },
     myBlogs: [{
         type: Schema.Types.ObjectId,
         ref: 'Blog'

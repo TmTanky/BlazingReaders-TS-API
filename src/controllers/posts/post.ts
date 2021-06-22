@@ -208,6 +208,7 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
 
     const userID = req.params.userID
     const limitCount = req.query.limit as string
+    const theUser = await User.findById(userID)
 
     try {
 
@@ -238,8 +239,6 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
             })
 
         }
-
-        const theUser = await User.findById(userID)
         
         if (theUser?.role === Roles.ADMIN) {
 
@@ -256,21 +255,25 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
 
         }
         
-        const totalBlogs = await Blog.find()
-        const allUsers = await User.find().where('role').equals('admin').populate('followers')
+        if (theUser?.role === Roles.NORMAL) {
 
-        // Almost working
-        const filteredPublishers = allUsers.filter(item => {
-            const user = !item.followers.find(() => theUser?._id.toString())
-            return user
-        })
-        const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
+            const totalBlogs = await Blog.find()
+            const allUsers = await User.find().where('role').equals('admin').populate('followers')
 
-        return res.status(200).json({
-            status: res.status,
-            blogs: allBlogs,
-            randomUsers: filteredPublishers
-        })
+            // Almost working
+            const filteredPublishers = allUsers.filter(item => {
+                const user = item.followers.find(() => theUser?._id.toString())
+                return user
+            })
+            const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
+
+            return res.status(200).json({
+                status: res.status,
+                blogs: allBlogs,
+                randomUsers: filteredPublishers
+            })
+
+        }
         
     } catch (err) {
         next(createError(400, 'Please try again.'))

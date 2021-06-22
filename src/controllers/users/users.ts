@@ -2,6 +2,7 @@ import {RequestHandler} from 'express'
 import {hash, compare} from 'bcrypt'
 import {sign} from 'jsonwebtoken'
 import createError from 'http-errors'
+// import sharp from 'sharp'
 
 // Enums 
 import {Roles} from '../../interfaces/roles'
@@ -314,6 +315,31 @@ export const editPassword: RequestHandler = async (req, res, next) => {
         } else {
             return next(createError(400, 'Invalid Password.'))
         }
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}
+
+export const editAvatar: RequestHandler = async (req, res, next) => {
+
+    const userID = req.params.userID
+
+    try {
+
+        if (!req.file) {
+            return next(createError(400, 'Photo must be provided.'))
+        }
+
+        await User.findOneAndUpdate({_id: userID}, {
+            avatar: `${req.file.path}`
+        })
+
+        return res.status(202).json({
+            status: 'ok',
+            msg: 'Avatar Changed Successfully'
+        })
         
     } catch (err) {
         next(createError(400, 'Please try again.'))

@@ -12,7 +12,6 @@ import userRoute from './routes/users/user'
 import registerRoute from './routes/users/register'
 import loginRoute from './routes/users/login'
 import blogRoute from './routes/posts/post'
-import practiceUpload from './routes/imgs/tryimgupload'
 import tweetRoute from './routes/tweets/tweet'
 import dashboardRoute from './routes/dashboard/dashboard'
 
@@ -27,7 +26,6 @@ connect(`${process.env.MONGO}`, {useCreateIndex: true, useFindAndModify: false, 
 app.use(registerRoute)
 app.use(loginRoute)
 app.use(blogRoute)
-app.use(practiceUpload)
 app.use(userRoute)
 app.use(tweetRoute)
 app.use(dashboardRoute)

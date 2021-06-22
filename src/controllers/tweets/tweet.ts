@@ -39,3 +39,35 @@ export const createTweet: RequestHandler = async (req, res, next) => {
     }
 
 }
+
+export const deleteTweet: RequestHandler = async (req, res, next) => {
+
+    const userID = req.params.userID
+    const tweetID = req.params.tweetID
+
+    try {
+
+        const notFound = await Tweet.findById(tweetID)
+
+        if (!notFound) {
+            return next(createError(400, 'Tweet not found.'))
+        }
+
+        await User.findOneAndUpdate({_id: userID}, {
+            $pull: {
+                myTweets: tweetID
+            }
+        })
+
+        await Tweet.findOneAndDelete({_id: tweetID})
+
+        return res.status(202).json({
+            status: 'ok',
+            msg: 'Successfully Deleted.'
+        })
+        
+    } catch (err) {
+        next(createError(400, 'Please try again.'))
+    }
+
+}

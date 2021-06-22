@@ -6,8 +6,9 @@ const router = Router()
 import {authJWT} from '../../auth/auth'
 
 // Controllers
-import {createTweet} from '../../controllers/tweets/tweet'
+import {createTweet, deleteTweet} from '../../controllers/tweets/tweet'
 
 router.post('/createtweet/:userID', authJWT, createTweet)
+router.delete('/deletetweet/:userID/:tweetID', authJWT, deleteTweet)
 
 export default router
