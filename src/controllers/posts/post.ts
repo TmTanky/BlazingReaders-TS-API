@@ -208,7 +208,6 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
 
     const userID = req.params.userID
     const limitCount = req.query.limit as string
-    const theUser = await User.findById(userID)
 
     try {
 
@@ -217,6 +216,17 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
             const totalBlogs = await Blog.find()
             const allUsers = await User.find().where('role').equals('admin')
             const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
+
+            if (totalBlogs.length < 5) {
+
+                const allBlogs = await Blog.find()
+                return res.status(200).json({
+                    status: res.status,
+                    blogs: allBlogs,
+                    randomUsers: allUsers
+                })
+
+            }
 
             return res.status(200).json({
                 status: res.status,
@@ -230,7 +240,7 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
 
             const blogsLength = (await Blog.find()).length
             const allBlogs = await Blog.find().limit(parseInt(limitCount))
-            const isMaxed = blogsLength === parseInt(limitCount)
+            const isMaxed = blogsLength < parseInt(limitCount)
 
             return res.status(200).json({
                 status: res.status,
@@ -239,41 +249,72 @@ export const getAllBlogs: RequestHandler = async (req, res, next) => {
             })
 
         }
+
+        const theUser = await User.findById(userID)
         
         if (theUser?.role === Roles.ADMIN) {
 
             const totalBlogs = await Blog.find()
             const allUsers = await User.find().where('role').equals('admin')
-            const filteredPublishers = allUsers.filter(item => item._id.toString() !== theUser._id.toString())
+
+            if (totalBlogs.length < 5) {
+
+                const allBlogs = await Blog.find()
+                const filteredPublishers2 = allUsers.filter(item => {
+                    const user = !item.followers.find((human) => human._id.toString() === userID)
+                    return user
+                }).filter(item => item._id.toString() !== theUser._id.toString())
+                
+                return res.status(200).json({
+                    status: res.status,
+                    blogs: allBlogs,
+                    randomUsers: filteredPublishers2
+                })
+                
+            }
+            
+            const filteredPublishers2 = allUsers.filter(item => {
+                const user = !item.followers.find((human) => human._id.toString() === userID)
+                return user
+            }).filter(item => item._id.toString() !== theUser._id.toString())
+            // const filteredPublishers = allUsers.filter(item => item._id.toString() !== userID)
             const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
 
             return res.status(200).json({
                 status: res.status,
                 blogs: allBlogs,
-                randomUsers: filteredPublishers
+                randomUsers: filteredPublishers2
             })
 
         }
         
-        if (theUser?.role === Roles.NORMAL) {
+        const totalBlogs = await Blog.find()
+        const allUsers = await User.find().where('role').equals('admin').populate('followers')
+        // Working
+        const filteredPublishers = allUsers.filter(item => {
+            const user = !item.followers.find((human) => human._id == userID)
+            return user
+        })
 
-            const totalBlogs = await Blog.find()
-            const allUsers = await User.find().where('role').equals('admin').populate('followers')
-
-            // Almost working
-            const filteredPublishers = allUsers.filter(item => {
-                const user = item.followers.find(() => theUser?._id.toString())
-                return user
-            })
-            const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
-
+        if (totalBlogs.length < 5) {
+            console.log('pota')
             return res.status(200).json({
                 status: res.status,
-                blogs: allBlogs,
+                blogs: totalBlogs,
                 randomUsers: filteredPublishers
             })
-
         }
+        // console.log(filteredPublishers)
+        // const filteredPublishers = allUsers.filter(item => {
+        //     const user = !item.followers.find(() => theUser?._id.toString())
+        //     return user
+        // })
+        const allBlogs = await Blog.find().limit(5).skip(Math.floor((Math.random() * (totalBlogs.length / 2)) + 1))
+        return res.status(200).json({
+            status: res.status,
+            blogs: allBlogs,
+            randomUsers: filteredPublishers
+        })
         
     } catch (err) {
         next(createError(400, 'Please try again.'))

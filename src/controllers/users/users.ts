@@ -130,7 +130,7 @@ export const editUserRole: RequestHandler = async (req, res, next) => {
         }, { new: true })
 
         return res.status(200).json({
-            status: res.status,
+            status: 'ok',
             data: updatedUser
         })
         
